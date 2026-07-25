@@ -115,13 +115,23 @@ export class JellyPagination extends HTMLElement {
     const cur   = this.page;
     const out: (number | '…')[] = [];
     const win   = 1;
+    const pages = new Set<number>([1, total]);
 
-    for (let p = 1; p <= total; p++) {
-      if (p === 1 || p === total || (p >= cur - win && p <= cur + win)) {
-        out.push(p);
-      } else if (out[out.length - 1] !== '…') {
+    for (let p = cur - win; p <= cur + win; p++) {
+      if (p >= 1 && p <= total) {
+        pages.add(p);
+      }
+    }
+
+    let previous: number | null = null;
+
+    for (const p of [...pages].sort((a, b) => a - b)) {
+      if (previous !== null && p - previous > 1) {
         out.push('…');
       }
+
+      out.push(p);
+      previous = p;
     }
 
     return out;

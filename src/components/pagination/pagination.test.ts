@@ -34,3 +34,26 @@ test('clicking a page button navigates and fires change', async () => {
 
   host.remove();
 });
+
+test('moving from page 1 to 6 does not duplicate page numbers', async () => {
+  const host = mount('<jelly-pagination total="12" page="1"></jelly-pagination>');
+  const el = host.querySelector('jelly-pagination') as JellyPagination;
+  await raf();
+
+  for (let i = 0; i < 5; i++) {
+    const next = [...el.shadowRoot!.querySelectorAll('jelly-button')].find((button) => button.getAttribute('label') === 'Next page');
+
+    next?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await raf();
+  }
+
+  expect(el.page).toBe(6);
+
+  const labels = [...el.shadowRoot!.querySelectorAll('jelly-button')].map((button) => button.textContent?.trim() ?? '');
+  const pages  = labels.filter((label) => /^\d+$/.test(label));
+
+  expect(pages.filter((label) => label === '5')).toHaveLength(1);
+  expect(new Set(pages).size).toBe(pages.length);
+
+  host.remove();
+});
